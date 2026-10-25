@@ -1,0 +1,5 @@
+i dont have a strong config file
+    - loadenv every time a db is called (env.py)
+
+
+    
