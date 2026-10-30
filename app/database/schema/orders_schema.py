@@ -20,7 +20,7 @@ class Orders(Base):
     user_id : Mapped[int] = mapped_column(sa.ForeignKey("userdb.user_id"))
     order_id : Mapped[int] = mapped_column(primary_key=True, nullable=False, autoincrement=True)
     restaurant_id : Mapped[int] = mapped_column(sa.ForeignKey("restaurants.restaurant_id"))
-    total_value : Mapped[int] = mapped_column(sa.Integer, nullable=False)
+    total_value : Mapped[int] = mapped_column(sa.Integer, nullable=False, server_default=sa.text("0"))
     status : Mapped[OrderStatus] = mapped_column(
         sa_Enum(OrderStatus, name="order_status"), default=OrderStatus.PENDING, nullable=False
     )

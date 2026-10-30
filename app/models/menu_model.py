@@ -9,7 +9,7 @@ class MenuItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-    id :int
+    item_id :int
     name : str
     price : int
     restaurant_id : int  = Field(exclude=True)

@@ -43,15 +43,26 @@ def post_restaurant(data: NewRestaurantModel, current_user: user_dependency, db:
     db.refresh(new)
     return new
 
+import sqlalchemy as sa
 
+"""
+rest_id
+item_id
+name
+price
+"""
 
 @router.post("/{id}/menu")
 def new_menu_item(id : int, data: NewMenuItem, db:db_dependency):
-    new = Menu(restaurant_id = id, **data.model_dump())
+    max_id = db.scalar(sa.select(sa.func.max(Menu.item_id)).where(Menu.restaurant_id==id))
+    next_id = max_id + 1 if max_id is not None else 1
+
+    new = Menu(restaurant_id=id, item_id=next_id, **data.model_dump())
     db.add(new)
     db.commit()
     db.refresh(new)
     return new
+
 
 
 @router.get("/{id}/menu", response_model=list[MenuItem])
@@ -61,3 +72,23 @@ def menu_itens(id : int, db:db_dependency):
     if all_itens is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This restaurant doesn't have a manu yet.")
     return all_itens
+
+
+from ..models.order_item_model import OrderItemModel
+from ..models.order_model import OrdersModel 
+from ..database.schema.order_item_schema import OrderItem
+from ..database.schema.orders_schema import Orders, OrderStatus
+
+@router.post("/{id}/order/")
+def create_order(id:int, user_request: OrderItemModel, user : user_dependency, db: db_dependency):
+    header = Orders(user_id=user.user_id, restaurant_id=id, status=OrderStatus.PENDING)
+    db.add(header)
+    db.commit()
+    db.refresh(header)
+    new = OrderItem(user_id=user.user_id, order_id=header.order_id , **user_request.model_dump()) ## [todo] get order id
+    db.add(new)
+    db.commit()
+    db.refresh(new)
+    return new
+
+    
